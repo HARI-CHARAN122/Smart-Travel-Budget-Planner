@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Smart Travel & Budget Planner</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f9f9f9;
+    margin: 0;
+    color: #333;
+  }
+  header {
+    background: #00796B;
+    color: white;
+    padding: 15px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header h1 {
+    font-size: 20px;
+    margin: 0;
+  }
+  #search {
+    padding: 8px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    width: 200px;
+    max-width: 100%;
+  }
+  .container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    gap: 20px;
+    padding: 20px;
+  }
+  .card {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+  }
+  .card:hover {
+    transform: scale(1.02);
+  }
+  .card h2 {
+    margin-top: 0;
+    color: #004d40;
+    font-size: 18px;
+  }
+  ul {
+    padding-left: 20px;
+    margin: 10px 0;
+  }
+  .total-budget {
+    font-weight: bold;
+    margin-top: 10px;
+  }
+  .map-link {
+    display: inline-block;
+    margin-top: 10px;
+    background: #00796B;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+  }
+  .map-link:hover {
+    background: #004d40;
+  }
+  footer {
+    text-align: center;
+    padding: 15px;
+    background: #eee;
+    font-size: 14px;
+    margin-top: 30px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Smart Travel & Budget Planner</h1>
+  <input type="text" id="search" placeholder="Search city...">
+</header>
+
+<div class="container" id="cityContainer"></div>
+
+<footer>
+  &copy; 2025 Smart Travel Planner | All rights reserved
+</footer>
+
+<script>
+const cities = [
+  {name:"Warangal",from:"Hyderabad",modes:["🚌 Bus: ₹300–₹600 (3 hrs)","🚆 Train: ₹150–₹400 (2.5 hrs)","🚗 Car: ₹1,000–₹1,500 (3 hrs)"],stay:"₹1,000–₹2,500/night",food:"₹200–₹500/day",budget:"₹1,500–₹4,000",map:"https://www.openstreetmap.org/?mlat=17.9784&mlon=79.5941#map=12/17.9784/79.5941"},
+  {name:"Karimnagar",from:"Hyderabad",modes:["🚌 Bus: ₹400–₹800 (4 hrs)","🚆 Train: ₹200–₹500 (3 hrs)","🚗 Car: ₹1,000–₹1,500 (4 hrs)"],stay:"₹1,000–₹2,500/night",food:"₹200–₹500/day",budget:"₹1,500–₹4,500",map:"https://www.openstreetmap.org/?mlat=17.3167&mlon=79.1289#map=12/17.3167/79.1289"},
+  {name:"Araku Valley",from:"Hyderabad",modes:["🚌 Bus: ₹500–₹1,000 (7 hrs)","🚆 Train: ₹300–₹700 (8 hrs)","🚗 Car: ₹2,000–₹3,000 (6 hrs)"],stay:"₹1,500–₹3,000/night",food:"₹300–₹600/day",budget:"₹2,500–₹6,000",map:"https://www.openstreetmap.org/?mlat=18.1984&mlon=82.7753#map=12/18.1984/82.7753"},
+  {name:"Chennai",from:"Hyderabad",modes:["🚌 Bus: ₹1,000–₹1,800 (12 hrs)","🚆 Train: ₹500–₹1,200 (12 hrs)","✈️ Flight: ₹2,000–₹5,000 (1 hr)"],stay:"₹2,000–₹5,000/night",food:"₹400–₹800/day",budget:"₹3,500–₹8,000",map:"https://www.openstreetmap.org/?mlat=13.0827&mlon=80.2707#map=12/13.0827/80.2707"},
+  {name:"Bangalore",from:"Hyderabad",modes:["🚌 Bus: ₹800–₹1,500 (10 hrs)","🚆 Train: ₹400–₹1,000 (9 hrs)","✈️ Flight: ₹2,000–₹4,500 (1 hr)"],stay:"₹2,000–₹6,000/night",food:"₹400–₹800/day",budget:"₹3,500–₹8,500",map:"https://www.openstreetmap.org/?mlat=12.9716&mlon=77.5946#map=12/12.9716/77.5946"},
+  {name:"Badrachalam",from:"Hyderabad",modes:["🚌 Bus: ₹400–₹800 (6 hrs)","🚆 Train: ₹300–₹600 (5 hrs)","🚗 Car: ₹1,200–₹1,800 (6 hrs)"],stay:"₹1,000–₹2,500/night",food:"₹200–₹500/day",budget:"₹1,500–₹4,000",map:"https://www.openstreetmap.org/?mlat=17.5941&mlon=80.2392#map=12/17.5941/80.2392"},
+  {name:"Kurnool",from:"Hyderabad",modes:["🚌 Bus: ₹300–₹600 (4 hrs)","🚆 Train: ₹150–₹500 (3.5 hrs)","🚗 Car: ₹800–₹1,500 (4 hrs)"],stay:"₹1,000–₹2,500/night",food:"₹200–₹500/day",budget:"₹1,500–₹4,500",map:"https://www.openstreetmap.org/?mlat=15.8281&mlon=78.0469#map=12/15.8281/78.0469"},
+  {name:"Ulchala Village",from:"Hyderabad",modes:["🚌 Bus: ₹300–₹600 (6 hrs)","🚆 Train: ₹200–₹500 (5 hrs)","🚗 Car: ₹1,000–₹1,500 (5 hrs)"],stay:"₹800–₹2,000/night",food:"₹200–₹400/day",budget:"₹1,500–₹4,000",map:"https://www.openstreetmap.org/?mlat=17.7550&mlon=79.4550#map=12/17.7550/79.4550"},
+  {name:"Delhi",from:"Hyderabad",modes:["🚌 Bus: ₹1,000–₹2,000 (24 hrs)","🚆 Train: ₹700–₹1,500 (24 hrs)","✈️ Flight: ₹2,500–₹5,000 (2.5 hrs)"],stay:"₹2,000–₹5,000/night",food:"₹400–₹800/day",budget:"₹3,500–₹8,500",map:"https://www.openstreetmap.org/?mlat=28.6139&mlon=77.2090#map=12/28.6139/77.2090"},
+  {name:"Mumbai",from:"Hyderabad",modes:["🚌 Bus: ₹800–₹1,800 (18 hrs)","🚆 Train: ₹500–₹1,200 (16 hrs)","✈️ Flight: ₹2,000–₹4,500 (1.5 hrs)"],stay:"₹2,000–₹6,000/night",food:"₹500–₹1,000/day",budget:"₹3,500–₹10,000",map:"https://www.openstreetmap.org/?mlat=19.0760&mlon=72.8777#map=12/19.0760/72.8777"},
+  {name:"Kolkata",from:"Hyderabad",modes:["🚌 Bus: ₹900–₹2,000 (24 hrs)","🚆 Train: ₹600–₹1,500 (26 hrs)","✈️ Flight: ₹2,500–₹6,000 (2.5 hrs)"],stay:"₹1,500–₹4,000/night",food:"₹300–₹800/day",budget:"₹3,000–₹8,500",map:"https://www.openstreetmap.org/?mlat=22.5726&mlon=88.3639#map=12/22.5726/88.3639"},
+  {name:"Pune",from:"Hyderabad",modes:["🚌 Bus: ₹700–₹1,500 (13 hrs)","🚆 Train: ₹400–₹1,000 (14 hrs)","✈️ Flight: ₹2,000–₹4,500 (1 hr)"],stay:"₹1,500–₹4,000/night",food:"₹300–₹700/day",budget:"₹2,500–₹6,500",map:"https://www.openstreetmap.org/?mlat=18.5204&mlon=73.8567#map=12/18.5204/73.8567"},
+  {name:"Ahmedabad",from:"Hyderabad",modes:["🚌 Bus: ₹1,000–₹2,200 (21 hrs)","🚆 Train: ₹700–₹1,500 (22 hrs)","✈️ Flight: ₹2,500–₹5,000 (2 hrs)"],stay:"₹1,500–₹4,000/night",food:"₹300–₹700/day",budget:"₹3,000–₹8,500",map:"https://www.openstreetmap.org/?mlat=23.0225&mlon=72.5714#map=12/23.0225/72.5714"},
+  {name:"Jaipur",from:"Hyderabad",modes:["🚌 Bus: ₹1,000–₹2,500 (23 hrs)","🚆 Train: ₹800–₹1,800 (22 hrs)","✈️ Flight: ₹2,500–₹5,500 (2 hrs)"],stay:"₹1,500–₹4,000/night",food:"₹300–₹700/day",budget:"₹3,000–₹8,500",map:"https://www.openstreetmap.org/?mlat=26.9124&mlon=75.7873#map=12/26.9124/75.7873"}
+];
+
+function renderCities(list) {
+  const container = document.getElementById("cityContainer");
+  container.innerHTML = "";
+  list.forEach(c => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <h2>${c.from} → ${c.name}</h2>
+      <ul>${c.modes.map(m => `<li>${m}</li>`).join("")}</ul>
+      <p>🏨 Accommodation: ${c.stay}</p>
+      <p>🍽 Food: ${c.food}</p>
+      <p class="total-budget">💰 Estimated Total Budget: ${c.budget}</p>
+      <a class="map-link" href="${c.map}" target="_blank">📍 View on Map</a>
+    `;
+    container.appendChild(card);
+  });
+}
+
+document.getElementById("search").addEventListener("input", e => {
+  const val = e.target.value.toLowerCase();
+  renderCities(cities.filter(c => c.name.toLowerCase().includes(val)));
+});
+
+renderCities(cities);
+</script>
+
+</body>
+</html>

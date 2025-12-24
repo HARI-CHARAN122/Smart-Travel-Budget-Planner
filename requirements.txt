@@ -1,0 +1,12 @@
+sentence-transformers
+streamlit
+langchain
+chromadb
+tiktoken
+fastapi
+uvicorn
+pydantic
+requests
+python-multipart
+transformers
+torch

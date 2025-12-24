@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Smart Travel Planner — v2.1 (All Major Indian Cities)</title>
+  <meta name="description" content="Smart Travel & Budget Planner — v2.1 with all major Indian cities included."/>
+  <style>
+    :root{
+      --bg:#f3f6f8; --card:#ffffff; --accent:#00796B; --muted:#6b6f76;
+      --glass: rgba(255,255,255,0.6);
+    }
+    [data-theme="dark"]{
+      --bg:#0f1720; --card:#0b1220; --accent:#39d1a6; --muted:#9aa4b2; --glass: rgba(255,255,255,0.02);
+      color: #e6eef6;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,var(--bg), #e9eef2 60%);
+      min-height:100vh; padding:28px; color: #0b2430;
+    }
+    header{display:flex;gap:12px;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto 18px;}
+    header h1{font-size:20px;margin:0;color:var(--accent)}
+    .controls{display:flex;gap:10px;align-items:center}
+    .search{padding:10px 12px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);min-width:260px;background:var(--card);box-shadow:0 6px 18px rgba(2,6,23,0.04)}
+    .search input{border:0;outline:0;background:transparent;width:100%;font-size:14px}
+    .btn{background:var(--accent);color:#fff;padding:8px 12px;border-radius:10px;border:0;cursor:pointer}
+    .toggle{display:flex;gap:8px;align-items:center}
+    .container{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 420px;gap:18px;align-items:start}
+    .left{display:grid;gap:12px}
+    .city-card{
+      display:flex;flex-direction:column;background:var(--card);border-radius:12px;overflow:hidden;box-shadow:0 8px 22px rgba(2,6,23,0.07);
+      transition:transform .18s ease, box-shadow .18s ease;
+    }
+    .city-card:hover{transform:translateY(-6px)}
+    .banner{height:180px;background-size:cover;background-position:center}
+    .card-body{padding:14px}
+    .card-body h2{margin:0 0 8px;font-size:18px}
+    .meta{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:13px}
+    .meta span{background:var(--glass);padding:6px 8px;border-radius:8px}
+    .budget{margin-top:10px;font-weight:600;color:var(--accent)}
+    .map{height:180px;border:0;width:100%}
+    .right{position:sticky;top:28px;align-self:start}
+    .panel{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 8px 22px rgba(2,6,23,0.06)}
+    .field{display:flex;flex-direction:column;margin-bottom:10px}
+    label{font-size:13px;color:var(--muted);margin-bottom:6px}
+    input[type="number"], select{padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);background:transparent}
+    .row{display:flex;gap:8px}
+    .compare-box{display:flex;gap:8px;margin-top:8px}
+    .small{font-size:13px;color:var(--muted)}
+    .attractions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .chip{background:var(--glass);padding:8px 10px;border-radius:999px;font-size:13px;color:var(--muted)}
+    footer{max-width:1200px;margin:18px auto 0;text-align:center;color:var(--muted);font-size:13px}
+    @media (max-width:1000px){
+      .container{grid-template-columns:1fr}
+      header{padding-bottom:8px}
+      .right{position:static}
+    }
+    .fade-in{animation:fadeIn .28s ease}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Smart Travel Planner — v2.1 (All Major Cities)</h1>
+  <div class="controls">
+    <div class="search">
+      <input id="searchInput" placeholder="Search or type a city (e.g., Mumbai)" oninput="onSearch()" />
+    </div>
+    <div class="toggle">
+      <label style="font-size:13px" for="themeToggle">Dark</label>
+      <input id="themeToggle" type="checkbox" aria-label="toggle theme" />
+    </div>
+    <button class="btn" onclick="resetView()">Reset</button>
+  </div>
+</header>
+
+<div class="container">
+  <div class="left">
+    <div id="mainCard" class="city-card fade-in">
+      <div id="banner" class="banner" style="background-image: url('https://images.unsplash.com/photo-1526772662000-3f88f10405ff?auto=format&fit=crop&w=1400&q=60')"></div>
+      <div class="card-body">
+        <h2 id="cityTitle">Select a city to view details</h2>
+        <div class="meta" id="metaRow">
+          <span id="travelHints">From Hyderabad • choose transport</span>
+          <span id="timeHint"></span>
+          <span id="priceHint"></span>
+        </div>
+
+        <div style="margin-top:12px" id="descArea">
+          <p class="small">Pick a city from the right panel or search above. Budget calculator on the right updates with travel choices.</p>
+        </div>
+
+        <div class="attractions" id="attractions"></div>
+
+        <div style="margin-top:12px">
+          <iframe id="mapFrame" class="map" src="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+      </div>
+    </div>
+
+    <div id="compareResult" class="city-card" style="display:none">
+      <div class="card-body">
+        <h2>Comparison</h2>
+        <div id="compareContent" class="small"></div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="right">
+    <div class="panel">
+      <h3 style="margin-top:0">Budget Calculator</h3>
+
+      <div class="field">
+        <label>Selected City</label>
+        <select id="citySelect" onchange="onCityChange()" size="8" style="height:320px;">
+          <!-- options populated by JS -->
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Transport</label>
+        <select id="transportSelect" onchange="recalculate()">
+          <option value="bus">Bus</option>
+          <option value="train">Train</option>
+          <option value="car">Car</option>
+          <option value="flight">Flight</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <div style="flex:1" class="field">
+          <label>Days</label>
+          <input id="days" type="number" min="1" value="1" onchange="recalculate()">
+        </div>
+        <div style="flex:1" class="field">
+          <label>People</label>
+          <input id="people" type="number" min="1" value="1" onchange="recalculate()">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Travel Type / Specialization</label>
+        <select id="specialization" onchange="recalculate()">
+          <option value="general">General</option>
+          <option value="budget">Budget</option>
+          <option value="luxury">Luxury</option>
+          <option value="family">Family</option>
+          <option value="adventure">Adventure</option>
+          <option value="beach">Beach</option>
+          <option value="food">Culinary</option>
+          <option value="pilgrimage">Pilgrimage</option>
+          <option value="romantic">Romantic</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Accommodation type</label>
+        <select id="stayType" onchange="recalculate()">
+          <option value="budget">Budget</option>
+          <option value="standard">Standard</option>
+          <option value="premium">Premium</option>
+        </select>
+      </div>
+
+      <div style="margin-top:8px">
+        <div class="small">Estimated total:</div>
+        <div id="totalBudget" class="budget">—</div>
+        <div id="breakdown" class="small" style="margin-top:8px"></div>
+      </div>
+
+      <hr style="margin:12px 0;border:none;height:1px;background:linear-gradient(90deg,transparent,var(--glass),transparent)">
+
+      <h4 style="margin:6px 0">Quick Compare</h4>
+      <div class="compare-box">
+        <select id="compareA" onchange="onCompareChange()"></select>
+        <select id="compareB" onchange="onCompareChange()"></select>
+      </div>
+      <div style="margin-top:8px">
+        <button class="btn" onclick="doCompare()">Compare</button>
+      </div>
+    </div>
+
+    <div style="height:12px"></div>
+
+    <div class="panel" style="text-align:center">
+      <div style="font-size:13px;color:var(--muted)">Pro tip</div>
+      <div style="margin-top:8px;font-weight:600">Click a city to load details → change transport & days → watch budget update</div>
+    </div>
+  </aside>
+</div>
+
+<footer>
+  Built with ❤️ — dataset expanded to include major Indian cities (sources: Wikipedia, StatisticsTimes, Times of India). :contentReference[oaicite:2]{index=2}
+</footer>
+
+<script>
+/* ---------- Backend API Configuration ---------- */
+const BACKEND_URL = 'http://localhost:8000';
+
+/* ---------- Expanded city dataset (major Indian cities) ---------- */
+const cities = {
+  mumbai:{title:'Mumbai', banner:'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[800,1800,18],train:[500,1200,16],flight:[2000,4500,1.5],car:[1500,3000,18]}, stay:{budget:2000,standard:4000,premium:7000}, food:[500,1000], lat:19.0760,lng:72.8777, top:['Gateway of India','Marine Drive','Colaba Causeway'], tip:'Financial capital — expect higher hotel rates in South Mumbai.'},
+  delhi:{title:'Delhi', banner:'https://images.unsplash.com/photo-1508057198894-247b23fe5ade?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[1000,2000,24],train:[700,1500,24],flight:[2500,5000,2.5],car:[1800,3500,24]}, stay:{budget:1500,standard:3000,premium:5500}, food:[300,800], lat:28.6139,lng:77.2090, top:['Red Fort','Qutub Minar','India Gate'], tip:'Peak tourist season Oct–Mar.'},
+  bengaluru:{title:'Bengaluru', banner:'https://images.unsplash.com/photo-1528909514045-2fa4ac7a08ba?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[800,1500,10],train:[400,1000,9],flight:[2000,4500,1],car:[1500,3000,10]}, stay:{budget:1800,standard:3500,premium:6000}, food:[350,800], lat:12.9716,lng:77.5946, top:['Lalbagh','Bangalore Palace','Cubbon Park'], tip:'Traffic heavy during peak hours.'},
+  kolkata:{title:'Kolkata', banner:'https://images.unsplash.com/photo-1561484937-1f1e3d3b0d07?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[900,2000,24],train:[600,1500,26],flight:[2500,6000,2.5],car:[2000,3500,24]}, stay:{budget:1200,standard:3000,premium:5000}, food:[300,700], lat:22.5726,lng:88.3639, top:['Victoria Memorial','Howrah Bridge','Indian Museum'], tip:'Best time Oct–Mar.'},
+  chennai:{title:'Chennai', banner:'https://images.unsplash.com/photo-1546539788-5b5937b0a1c1?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[1000,1800,12],train:[500,1200,12],flight:[2000,5000,1],car:[2000,3500,12]}, stay:{budget:1800,standard:3200,premium:5000}, food:[350,800], lat:13.0827,lng:80.2707, top:['Marina Beach','Kapaleeshwarar Temple','Fort St. George'], tip:'Coastal city — humid summers.'},
+  hyderabad:{title:'Hyderabad', banner:'https://images.unsplash.com/photo-1533105071208-2fbc4f7180ff?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[300,900,7],train:[200,500,8],flight:[2000,4500,1],car:[1000,2500,7]}, stay:{budget:1500,standard:2800,premium:4500}, food:[250,700], lat:17.3850,lng:78.4867, top:['Charminar','Golconda Fort','Ramoji Film City'], tip:'Great biryani — try local eateries.'},
+  ahmedabad:{title:'Ahmedabad', banner:'https://images.unsplash.com/photo-1534422298391-e83937bd75e4?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[800,1800,21],train:[700,1500,22],flight:[2500,5000,2],car:[1500,3000,21]}, stay:{budget:1500,standard:3000,premium:5000}, food:[250,700], lat:23.0225,lng:72.5714, top:['Sabarmati Ashram','Adalaj Stepwell','Kankaria Lake'], tip:'Dry and hot summers.'},
+  surat:{title:'Surat', banner:'https://images.unsplash.com/photo-1582719478250-2d0a2c9c7a77?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[700,1600,10],train:[500,1200,8],flight:[2000,4500,1.5],car:[1200,2500,10]}, stay:{budget:1200,standard:2500,premium:4000}, food:[250,600], lat:21.1702,lng:72.8311, top:['Dumas Beach','Surat Castle','Sarthana Nature Park'], tip:'Known for textiles and diamonds.'},
+  pune:{title:'Pune', banner:'https://images.unsplash.com/photo-1506340624858-33b6b3a9f9d6?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[700,1500,13],train:[400,1000,14],flight:[2000,4500,1],car:[1200,2500,13]}, stay:{budget:1500,standard:3000,premium:5000}, food:[300,700], lat:18.5204,lng:73.8567, top:['Shaniwar Wada','Aga Khan Palace','Dagdusheth Halwai Temple'], tip:'Weekend getaways popular.'},
+  jaipur:{title:'Jaipur', banner:'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[1000,2500,23],train:[800,1800,22],flight:[2500,5500,2],car:[1700,3200,23]}, stay:{budget:1300,standard:2800,premium:5000}, food:[250,700], lat:26.9124,lng:75.7873, top:['Amber Fort','Hawa Mahal','City Palace'], tip:'Peak season Nov–Feb.'},
+  lucknow:{title:'Lucknow', banner:'https://images.unsplash.com/photo-1549893079-4f6b2bdc7a53?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[600,1200,8],train:[400,900,6],flight:[2000,4200,1],car:[1000,2000,8]}, stay:{budget:900,standard:2000,premium:3500}, food:[200,500], lat:26.8467,lng:80.9462, top:['Bara Imambara','Rumi Darwaza','Hazratganj'], tip:'Famous for kebabs and Awadhi cuisine.'},
+  kanpur:{title:'Kanpur', banner:'https://images.unsplash.com/photo-1562158070-38e276e9f0a1?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[500,1100,8],train:[300,800,6],flight:[2000,4200,1],car:[900,1800,8]}, stay:{budget:800,standard:1800,premium:3000}, food:[180,450], lat:26.4499,lng:80.3319, top:['Allen Forest Zoo','JK Temple','Bithoor'], tip:'Industrial city with historical spots.'},
+  nagpur:{title:'Nagpur', banner:'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[500,1100,6],train:[300,800,5],flight:[2000,4200,1.5],car:[900,1800,6]}, stay:{budget:900,standard:2000,premium:3500}, food:[200,500], lat:21.1458,lng:79.0882, top:['Deekshabhoomi','Futala Lake','Sitabuldi Fort'], tip:'Orange city; great local produce.'},
+  indore:{title:'Indore', banner:'https://images.unsplash.com/photo-1589352336719-dbfab7c4c3be?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[400,900,6],train:[300,800,5],flight:[1800,3800,1.5],car:[900,1700,6]}, stay:{budget:900,standard:2000,premium:3500}, food:[200,500], lat:22.7196,lng:75.8577, top:['Rajwada','Lal Bagh Palace','Sarafa Bazaar'], tip:'Renowned street food scene.'},
+  bhopal:{title:'Bhopal', banner:'https://images.unsplash.com/photo-1558980394-0f2c4b6f3b3c?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[400,900,7],train:[300,800,6],flight:[1800,3800,1.5],car:[900,1700,7]}, stay:{budget:900,standard:2000,premium:3500}, food:[200,500], lat:23.2599,lng:77.4126, top:['Upper Lake','Taj-ul-Masajid','Van Vihar'], tip:'Pleasant lakes and gardens.'},
+  visakhapatnam:{title:'Visakhapatnam', banner:'https://images.unsplash.com/photo-1509242568059-3c4a3c23b0c1?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[700,1400,12],train:[500,1200,10],flight:[2200,4500,1.5],car:[1400,2600,12]}, stay:{budget:1200,standard:2600,premium:4500}, food:[300,700], lat:17.6868,lng:83.2185, top:['Ramakrishna Beach','Kailasagiri','Araku Valley (nearby)'], tip:'Coastal with scenic hills.'},
+  patna:{title:'Patna', banner:'https://images.unsplash.com/photo-1509395176047-4a66953fd231?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[600,1300,12],train:[400,900,10],flight:[2000,4200,1.5],car:[1200,2500,12]}, stay:{budget:800,standard:2000,premium:3500}, food:[200,500], lat:25.5941,lng:85.1376, top:['Golghar','Patna Sahib Gurudwara','Agam Kuan'], tip:'Historical city on the Ganges.'},
+  vadodara:{title:'Vadodara', banner:'https://images.unsplash.com/photo-1541872703-8f6d9a6f9a5f?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[800,1700,12],train:[600,1200,10],flight:[2000,4200,1.5],car:[1300,2500,12]}, stay:{budget:900,standard:2200,premium:3800}, food:[200,500], lat:22.3072,lng:73.1812, top:['Laxmi Vilas Palace','Sayaji Baug','Baroda Museum'], tip:'Cultural city with palaces.'},
+  ghaziabad:{title:'Ghaziabad', banner:'https://images.unsplash.com/photo-1490578474895-699cd4e2cf59?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[400,900,1],train:[200,500,1],flight:[2200,4200,2.5],car:[500,1200,1]}, stay:{budget:700,standard:1800,premium:3200}, food:[180,450], lat:28.6692,lng:77.4538, top:['Swarn Jayanti Park','Adrish Park','ISKCON Temple'], tip:'Close to Delhi — often part of NCR travel plans.'},
+  ludhiana:{title:'Ludhiana', banner:'https://images.unsplash.com/photo-1526481280698-8c381f2e8f3b?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[500,1100,7],train:[400,900,6],flight:[2000,4200,1.5],car:[900,1700,7]}, stay:{budget:800,standard:2000,premium:3500}, food:[200,500], lat:30.9010,lng:75.8573, top:['Punjab Agricultural University Museum','Rakh Bagh Park','Hardy\'s World'], tip:'Industrial and agricultural center.'},
+  agra:{title:'Agra', banner:'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[400,900,4],train:[300,700,3],flight:[1800,3800,1],car:[900,1700,4]}, stay:{budget:800,standard:2000,premium:4000}, food:[200,500], lat:27.1767,lng:78.0081, top:['Taj Mahal','Agra Fort','Mehtab Bagh'], tip:'Best early morning visits to Taj Mahal.'},
+  nashik:{title:'Nashik', banner:'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[400,900,7],train:[300,800,6],flight:[1800,3800,1.5],car:[900,1700,7]}, stay:{budget:800,standard:1800,premium:3200}, food:[180,450], lat:19.9975,lng:73.7898, top:['Trimbakeshwar','Sula Vineyards','Vihigaon Waterfall'], tip:'Famous for vineyards and religious sites.'},
+  faridabad:{title:'Faridabad', banner:'https://images.unsplash.com/photo-1526403224740-10dd0c5f9f9e?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[400,900,1],train:[200,500,1],flight:[2200,4200,2.5],car:[500,1200,1]}, stay:{budget:700,standard:1700,premium:3000}, food:[180,450], lat:28.4089,lng:77.3178, top:['Sultanpur Bird Sanctuary','Badkhal Lake','Rose Garden Faridabad'], tip:'Part of NCR — easy day trips to Delhi.'},
+  meerut:{title:'Meerut', banner:'https://images.unsplash.com/photo-1532009324734-20a7a5813719?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[300,800,1],train:[200,500,1],flight:[2000,4200,2.5],car:[500,1100,1]}, stay:{budget:600,standard:1600,premium:3000}, food:[150,400], lat:28.9845,lng:77.7064, top:['Augarnath Temple','Jama Masjid','Shahpeer'], tip:'Historic city near Delhi.'},
+  rajkot:{title:'Rajkot', banner:'https://images.unsplash.com/photo-1543168250-5b5a50b6b06c?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[500,1100,9],train:[400,900,8],flight:[1800,3800,1.5],car:[1200,2400,9]}, stay:{budget:700,standard:1800,premium:3200}, food:[180,450], lat:22.3039,lng:70.8022, top:['Watson Museum','Rotary Dolls Museum','Kaba Gandhi No Delo'], tip:'Cultural city in Gujarat.'},
+  varanasi:{title:'Varanasi', banner:'https://images.unsplash.com/photo-1505678261036-a3fcc5e884ee?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[500,1100,10],train:[400,900,8],flight:[1800,3800,1.5],car:[1200,2400,10]}, stay:{budget:700,standard:1800,premium:3200}, food:[150,400], lat:25.3176,lng:82.9739, top:['Dashashwamedh Ghat','Kashi Vishwanath Temple','Sarnath'], tip:'Spiritual city on the Ganges — dress modestly.'},
+  srinagar:{title:'Srinagar', banner:'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[800,2000,24],train:[0,0,0],flight:[3000,7000,1.5],car:[2000,4500,24]}, stay:{budget:1500,standard:3200,premium:5500}, food:[300,800], lat:34.0837,lng:74.7973, top:['Dal Lake','Shankaracharya Temple','Mughal Gardens'], tip:'High-altitude — cooler year-round.'},
+  aurangabad:{title:'Aurangabad', banner:'https://images.unsplash.com/photo-1541263896028-3de3b9f2ca3a?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[500,1200,8],train:[400,900,6],flight:[1800,3800,1.5],car:[1000,2200,8]}, stay:{budget:700,standard:1800,premium:3200}, food:[150,450], lat:19.8762,lng:75.3433, top:['Ajanta & Ellora (nearby)','Bibi Ka Maqbara','Aurangabad Caves'], tip:'Great for UNESCO site visits.'},
+  dhanbad:{title:'Dhanbad', banner:'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[400,900,6],train:[300,800,5],flight:[1800,3800,2],car:[900,1700,6]}, stay:{budget:600,standard:1500,premium:2800}, food:[150,400], lat:23.7957,lng:86.4304, top:['Topchanchi Lake','Kali Mandir','Birsa Munda Stadium'], tip:'Coal mining region.'},
+  amritsar:{title:'Amritsar', banner:'https://images.unsplash.com/photo-1457449940276-e8deed18bfff?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[600,1400,10],train:[400,1000,8],flight:[2000,4200,1.5],car:[1200,2400,10]}, stay:{budget:800,standard:2000,premium:3600}, food:[200,500], lat:31.6340,lng:74.8723, top:['Golden Temple','Wagah Border','Partition Museum'], tip:'Respectful clothing recommended at religious sites.'},
+  navimumbai:{title:'Navi Mumbai', banner:'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[400,900,2],train:[200,600,1],flight:[2000,4200,1.5],car:[500,1200,2]}, stay:{budget:900,standard:2000,premium:3600}, food:[200,500], lat:19.0330,lng:73.0297, top:['Pandavkada Falls','Belapur Fort','Nehru Garden'], tip:'Planned township with coastal pockets.'},
+  prayagraj:{title:'Prayagraj', banner:'https://images.unsplash.com/photo-1505678261036-a3fcc5e884ee?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[400,900,6],train:[300,800,5],flight:[1800,3800,1.5],car:[900,1700,6]}, stay:{budget:700,standard:1800,premium:3200}, food:[150,400], lat:25.4358,lng:81.8463, top:['Triveni Sangam','Allahabad Fort','Khusro Bagh'], tip:'Major pilgrimage site during Kumbh.'},
+  howrah:{title:'Howrah', banner:'https://images.unsplash.com/photo-1520975912295-1b4c9e7b1b09?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[400,900,1],train:[200,500,1],flight:[2000,4200,2],car:[500,1200,1]}, stay:{budget:700,standard:1800,premium:3000}, food:[150,400], lat:22.5958,lng:88.2636, top:['Howrah Bridge','Belur Math','Eden Gardens (nearby)'], tip:'Adjacent to Kolkata — part of metro region.'},
+  ranchi:{title:'Ranchi', banner:'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[400,900,8],train:[300,800,6],flight:[1800,3800,2],car:[900,1800,8]}, stay:{budget:700,standard:1800,premium:3200}, food:[150,400], lat:23.3441,lng:85.3096, top:['Jagannath Temple','Rock Garden','Tagore Hill'], tip:'Hilly terrain nearby.'},
+  jabalpur:{title:'Jabalpur', banner:'https://images.unsplash.com/photo-1499346030926-9a72daac6c63?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[400,900,6],train:[300,800,5],flight:[1800,3800,1.5],car:[900,1700,6]}, stay:{budget:700,standard:1700,premium:3000}, food:[150,400], lat:23.1815,lng:79.9864, top:['Bhedaghat','Dhuandhar Falls','Madan Mahal Fort'], tip:'Natural waterfalls and marble rocks.'},
+  gwalior:{title:'Gwalior', banner:'https://images.unsplash.com/photo-1508610048659-a06b669e3321?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[400,900,6],train:[300,800,5],flight:[1800,3800,1.5],car:[900,1700,6]}, stay:{budget:700,standard:1700,premium:3200}, food:[150,400], lat:26.2183,lng:78.1828, top:['Gwalior Fort','Jai Vilas Palace','Teli Ka Mandir'], tip:'Historic fort city.'},
+  coimbatore:{title:'Coimbatore', banner:'https://images.unsplash.com/photo-1549187774-b4f3d86a6a1b?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[400,900,7],train:[300,800,6],flight:[1800,3800,1.5],car:[900,1700,7]}, stay:{budget:800,standard:2000,premium:3500}, food:[180,450], lat:11.0168,lng:76.9558, top:['Marudamalai Temple','VOC Park & Zoo','Gedee Car Museum'], tip:'Gateway to hill stations.'},
+  vijayawada:{title:'Vijayawada', banner:'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[400,900,8],train:[300,800,6],flight:[1800,3800,1.5],car:[900,1700,8]}, stay:{budget:700,standard:1800,premium:3200}, food:[150,400], lat:16.5062,lng:80.6480, top:['Undavalli Caves','Prakasam Barrage','Kanaka Durga Temple'], tip:'Riverfront city on Krishna.'},
+  jodhpur:{title:'Jodhpur', banner:'https://images.unsplash.com/photo-1499346030926-9a72daac6c63?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[500,1100,10],train:[400,900,8],flight:[1800,3800,1.5],car:[1000,2000,10]}, stay:{budget:800,standard:2000,premium:3500}, food:[180,450], lat:26.2389,lng:73.0243, top:['Mehrangarh Fort','Jaswant Thada','Umaid Bhawan Palace'], tip:'Desert city — carry sun protection.'},
+  madurai:{title:'Madurai', banner:'https://images.unsplash.com/photo-1499291317314-1a31ad9b8d5b?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[400,900,8],train:[300,800,6],flight:[1800,3800,1.5],car:[900,1700,8]}, stay:{budget:700,standard:1700,premium:3000}, food:[150,400], lat:9.9252,lng:78.1198, top:['Meenakshi Amman Temple','Thirumalai Nayakkar Palace','Gandhi Memorial Museum'], tip:'Sacred temple city.'},
+  raipur:{title:'Raipur', banner:'https://images.unsplash.com/photo-1534081333815-ae5019106622?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[400,900,6],train:[300,800,5],flight:[1800,3800,1.5],car:[900,1700,6]}, stay:{budget:700,standard:1700,premium:3000}, food:[150,400], lat:21.2514,lng:81.6296, top:['Doodhadhari Monastery','Purkhouti Muktangan','Magnetic Hill'], tip:'Good for regional nature spots.'},
+  kota:{title:'Kota', banner:'https://images.unsplash.com/photo-1508057198894-247b23fe5ade?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[400,900,6],train:[300,800,5],flight:[1800,3800,1.5],car:[900,1700,6]}, stay:{budget:600,standard:1500,premium:3000}, food:[150,400], lat:25.2138,lng:75.8648, top:['Kota Barrage','Ramnagar Garden','Jagmandir'], tip:'Famed for coaching institutes.'}
+};
+
+/* Specialization / travel-type modifiers: multipliers and per-person activity costs */
+const specializationModifiers = {
+  general:{stay:1, food:1, activity:0},
+  budget:{stay:0.8, food:0.9, activity:0},
+  luxury:{stay:1.4, food:1.3, activity:500},
+  family:{stay:1.1, food:1.2, activity:300},
+  adventure:{stay:1, food:1.1, activity:800},
+  beach:{stay:1.05, food:1.1, activity:300},
+  food:{stay:1.05, food:1.3, activity:200},
+  pilgrimage:{stay:0.95, food:0.9, activity:100},
+  romantic:{stay:1.25, food:1.2, activity:400}
+};
+
+/* Populate selects and UI */
+const citySelect = document.getElementById('citySelect');
+const compareA = document.getElementById('compareA');
+const compareB = document.getElementById('compareB');
+const searchInput = document.getElementById('searchInput');
+
+function populateLists(){
+  citySelect.innerHTML = '';
+  compareA.innerHTML = '';
+  compareB.innerHTML = '';
+  Object.keys(cities).forEach(key=>{
+    const c = cities[key];
+    const opt = document.createElement('option');
+    opt.value = key; opt.textContent = c.title;
+    citySelect.appendChild(opt);
+
+    const o1 = opt.cloneNode(true);
+    compareA.appendChild(o1);
+    const o2 = opt.cloneNode(true);
+    compareB.appendChild(o2);
+  });
+  compareA.selectedIndex = 0;
+  compareB.selectedIndex = 1;
+}
+populateLists();
+
+/* Theme toggle */
+const themeToggle = document.getElementById('themeToggle');
+themeToggle.addEventListener('change', e=>{
+  if(e.target.checked) document.documentElement.setAttribute('data-theme','dark');
+  else document.documentElement.removeAttribute('data-theme');
+});
+
+/* Fetch travel info from backend API */
+async function fetchTravelInfo(city) {
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/query`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({query: `Travel guide for ${city}`})
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      return data.answer; // Returns similar documents from vectorstore
+    }
+  } catch (error) {
+    console.log('Backend not available:', error);
+  }
+  return null;
+}
+
+/* City change handler */
+function onCityChange(){
+  const key = citySelect.value;
+  if(!key) return;
+  loadCity(key);
+  recalculate();
+}
+
+async function loadCity(key){
+  const c = cities[key];
+  document.getElementById('banner').style.backgroundImage = `url(${c.banner})`;
+  document.getElementById('cityTitle').textContent = `Hyderabad → ${c.title}`;
+  document.getElementById('travelHints').textContent = `From Hyderabad`;
+  document.getElementById('timeHint').textContent = `Typical travel time varies by transport`;
+  document.getElementById('priceHint').textContent = `Estimated ranges are shown`;
+  
+  // Display city tip only (no backend info)
+  document.getElementById('descArea').innerHTML = `<p class="small">${c.tip}</p>`;
+  
+  const atts = document.getElementById('attractions');
+  atts.innerHTML = '';
+  (c.top||[]).forEach(t=>{
+    const d = document.createElement('div'); d.className='chip'; d.textContent = t;
+    atts.appendChild(d);
+  });
+  // set map to OpenStreetMap embed with marker
+  const lat = c.lat, lon = c.lng;
+  const zoom = 11;
+  const osm = `https://www.openstreetmap.org/export/embed.html?bbox=${lon-0.5}%2C${lat-0.5}%2C${lon+0.5}%2C${lat+0.5}&layer=mapnik&marker=${lat}%2C${lon}`;
+  document.getElementById('mapFrame').src = osm;
+}
+
+/* search box filter */
+async function onSearch(){
+  const q = searchInput.value.trim().toLowerCase();
+  if(!q){
+    // do nothing if cleared
+    return;
+  }
+  // find nearest match by city name
+  const keys = Object.keys(cities);
+  const found = keys.find(k=>{
+    return cities[k].title.toLowerCase().includes(q);
+  });
+  if(found){
+    citySelect.value = found;
+    await loadCity(found);
+    recalculate();
+  }
+}
+
+/* Budget calculator logic */
+function recalculate(){
+  const key = citySelect.value;
+  if(!key) { document.getElementById('totalBudget').textContent='—'; return; }
+  const c = cities[key];
+  const transportType = document.getElementById('transportSelect').value;
+  const days = Math.max(1, Number(document.getElementById('days').value || 1));
+  const people = Math.max(1, Number(document.getElementById('people').value || 1));
+  const stayType = document.getElementById('stayType').value;
+
+  // determine transport cost: use midpoint of range
+  const tRange = c.travel[transportType] || c.travel['train'] || [300,800,6];
+  const tCost = Math.round((tRange[0] + tRange[1])/2);
+
+  const stayPerNight = c.stay[stayType] || c.stay['standard'];
+  let foodPerDayPerPerson = Math.round((c.food[0] + c.food[1])/2);
+
+  // apply specialization modifiers (stay/food multipliers and optional activity cost per person)
+  const spec = (document.getElementById('specialization')||{value:'general'}).value;
+  const mod = specializationModifiers[spec] || specializationModifiers['general'];
+  const adjStayPerNight = Math.round(stayPerNight * mod.stay);
+  foodPerDayPerPerson = Math.round(foodPerDayPerPerson * mod.food);
+
+  // calculation: transport per person (assume tCost is per person for bus/train/flight, for car assume cost is per vehicle)
+  let transportTotal = tCost * people;
+  if(transportType === 'car') transportTotal = Math.round(tCost); // car cost assumed for vehicle (user may share)
+
+  const stayTotal = adjStayPerNight * days * Math.ceil(people/2); // assume 2 per room
+  const foodTotal = foodPerDayPerPerson * days * people;
+  const activityTotal = (mod.activity || 0) * people;
+
+  const grand = transportTotal + stayTotal + foodTotal + activityTotal;
+  document.getElementById('totalBudget').textContent = `₹ ${grand.toLocaleString()} (approx)`;
+  document.getElementById('breakdown').innerHTML =
+    `Transport: ₹${transportTotal.toLocaleString()} • Stay: ₹${stayTotal.toLocaleString()} • Food: ₹${foodTotal.toLocaleString()} • Activity: ₹${activityTotal.toLocaleString()} (for ${people} pax / ${days} days)`;
+}
+
+/* Compare feature */
+function onCompareChange(){ /* noop for now */ }
+function doCompare(){
+  const a = compareA.value, b = compareB.value;
+  if(!a || !b || a===b){ alert('Pick two different cities to compare'); return; }
+  const A = cities[a], B = cities[b];
+  const tA = Math.round((A.travel.train[0]+A.travel.train[1])/2), tB = Math.round((B.travel.train[0]+B.travel.train[1])/2);
+  const stayA = A.stay.standard, stayB = B.stay.standard;
+  const foodA = Math.round((A.food[0]+A.food[1])/2), foodB = Math.round((B.food[0]+B.food[1])/2);
+
+  const sampleDays = 2, samplePeople = 1;
+  const totalA = tA*samplePeople + stayA*sampleDays + foodA*sampleDays*samplePeople;
+  const totalB = tB*samplePeople + stayB*sampleDays + foodB*sampleDays*samplePeople;
+
+  const content = `
+    <div style="display:flex;gap:12px;align-items:center">
+      <div style="flex:1">
+        <strong>${A.title}</strong><br><span class="small">Train≈₹${tA}, Stay(standard)≈₹${stayA}/night, Food≈₹${foodA}/day</span>
+      </div>
+      <div style="flex:1">
+        <strong>${B.title}</strong><br><span class="small">Train≈₹${tB}, Stay(standard)≈₹${stayB}/night, Food≈₹${foodB}/day</span>
+      </div>
+    </div>
+    <div style="margin-top:10px">Estimated total for 1 person, ${sampleDays} days: <strong>₹${totalA}</strong> vs <strong>₹${totalB}</strong></div>
+  `;
+  document.getElementById('compareContent').innerHTML = content;
+  document.getElementById('compareResult').style.display = 'block';
+  document.getElementById('compareResult').scrollIntoView({behavior:'smooth'});
+}
+
+/* reset view */
+function resetView(){
+  document.getElementById('mainCard').scrollIntoView({behavior:'smooth'});
+  document.getElementById('cityTitle').textContent = 'Select a city to view details';
+  document.getElementById('banner').style.backgroundImage = "url('https://images.unsplash.com/photo-1526772662000-3f88f10405ff?auto=format&fit=crop&w=1400&q=60')";
+  document.getElementById('descArea').innerHTML = `<p class="small">Pick a city from the right panel or search above. Budget calculator on the right updates with travel choices.</p>`;
+  document.getElementById('attractions').innerHTML = '';
+  document.getElementById('mapFrame').src = '';
+  document.getElementById('totalBudget').textContent = '—';
+  document.getElementById('breakdown').textContent = '';
+}
+
+/* initialize */
+(async function init(){
+  populateLists();
+  const firstKey = Object.keys(cities)[0];
+  citySelect.value = firstKey;
+  compareA.selectedIndex = 0;
+  compareB.selectedIndex = 1;
+  await loadCity(firstKey);
+  recalculate();
+})();
+
+</script>
+</body>
+</html>

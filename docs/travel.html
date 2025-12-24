@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Travel & Budget Planner: A Social Outreach for Better Mobility</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      color: #00695C;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    select {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+    .mode {
+      display: none;
+      border-left: 5px solid #00796B;
+      background: #f9f9f9;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+    }
+    .mode h2 {
+      color: #004d40;
+    }
+    ul {
+      padding-left: 20px;
+    }
+    .total-budget {
+      font-weight: bold;
+      margin-top: 10px;
+      color: #444;
+    }
+    a {
+      color: #00796B;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>Smart Travel & Budget Planner: A Social Outreach for Better Mobility</h1>
+  <div class="container">
+    <h2>Select a City to View Travel Info</h2>
+    <select id="citySelect" onchange="showCityInfo()">
+      <option value="">-- Choose a City --</option>
+      <option value="warangal">Warangal</option>
+      <option value="karimnagar">Karimnagar</option>
+      <option value="araku">Araku Valley</option>
+      <option value="chennai">Chennai</option>
+      <option value="bangalore">Bangalore</option>
+      <option value="badrachalam">Badrachalam</option>
+      <option value="kurnool">Kurnool</option>
+      <option value="ulchala">Ulchala Village</option>
+      <option value="delhi">Delhi</option>
+      <option value="mumbai">Mumbai</option>
+      <option value="kolkata">Kolkata</option>
+      <option value="pune">Pune</option>
+      <option value="ahmedabad">Ahmedabad</option>
+      <option value="jaipur">Jaipur</option>
+    </select>
+
+    <!-- City Sections -->
+
+    <div id="warangal" class="mode">
+      <h2>Hyderabad → Warangal</h2>
+      <ul>
+        <li>🚌 Bus: ₹300–₹600 (3 hrs)</li>
+        <li>🚆 Train: ₹150–₹400 (2.5 hrs)</li>
+        <li>🚗 Car: ₹1,000–₹1,500 (3 hrs)</li>
+      </ul>
+      <p>🏨 Accommodation: ₹1,000–₹2,500/night</p>
+      <p>🍽 Food: ₹200–₹500/day</p>
+      <p class="total-budget">💰 Estimated Total Budget: ₹1,500–₹4,000</p>
+      <p><a href="https://www.openstreetmap.org/?mlat=17.9784&mlon=79.5941#map=12/17.9784/79.5941" target="_blank">📍 View Warangal on Map</a></p>
+    </div>
+
+    <div id="karimnagar" class="mode">
+      <h2>Hyderabad → Karimnagar</h2>
+      <ul>
+        <li>🚌 Bus: ₹400–₹800 (4 hrs)</li>
+        <li>🚆 Train: ₹200–₹500 (3 hrs)</li>
+        <li>🚗 Car: ₹1,000–₹1,500 (4 hrs)</li>
+      </ul>
+      <p>🏨 Accommodation: ₹1,000–₹2,500/night</p>
+      <p>🍽 Food: ₹200–₹500/day</p>
+      <p class="total-budget">💰 Estimated Total Budget: ₹1,500–₹4,500</p>
+      <p><a href="https://www.openstreetmap.org/?mlat=17.3167&mlon=79.1289#map=12/17.3167/79.1289" target="_blank">📍 View Karimnagar on Map</a></p>
+    </div>
+
+    <div id="araku" class="mode">
+      <h2>Hyderabad → Araku Valley</h2>
+      <ul>
+        <li>🚌 Bus: ₹500–₹1,000 (7 hrs)</li>
+        <li>🚆 Train: ₹300–₹700 (8 hrs)</li>
+        <li>🚗 Car: ₹2,000–₹3,000 (6 hrs)</li>
+      </ul>
+      <p>🏨 Accommodation: ₹1,500–₹3,000/night</p>
+      <p>🍽 Food: ₹300–₹600/day</p>
+      <p class="total-budget">💰 Estimated Total Budget: ₹2,500–₹6,000</p>
+      <p><a href="https://www.openstreetmap.org/?mlat=18.1984&mlon=82.7753#map=12/18.1984/82.7753" target="_blank">📍 View Araku Valley on Map</a></p>
+    </div>
+
+    <div id="chennai" class="mode">
+      <h2>Hyderabad → Chennai</h2>
+      <ul>
+        <li>🚌 Bus: ₹1,000–₹1,800 (12 hrs)</li>
+        <li>🚆 Train: ₹500–₹1,200 (12 hrs)</li>
+        <li>✈️ Flight: ₹2,000–₹5,000 (1 hr)</li>
+      </ul>
+      <p>🏨 Accommodation: ₹2,000–₹5,000/night</p>
+      <p>🍽 Food: ₹400–₹800/day</p>
+      <p class="total-budget">💰 Estimated Total Budget: ₹3,500–₹8,000</p>
+      <p><a href="https://www.openstreetmap.org/?mlat=13.0827&mlon=80.2707#map=12/13.0827/80.2707" target="_blank">📍 View Chennai on Map</a></p>
+    </div>
+
+    <div id="bangalore" class="mode">
+      <h2>Hyderabad → Bangalore</h2>
+      <ul>
+        <li>🚌 Bus: ₹800–₹1,500 (10 hrs)</li>
+        <li>🚆 Train: ₹400–₹1,000 (9 hrs)</li>
+        <li>✈️ Flight: ₹2,000–₹4,500 (1 hr)</li>
+      </ul>
+      <p>🏨 Accommodation: ₹2,000–₹6,000/night</p>
+      <p>🍽 Food: ₹400–₹800/day</p>
+      <p class="total-budget">💰 Estimated Total Budget: ₹3,500–₹8,500</p>
+      <p><a href="https://www.openstreetmap.org/?mlat=12.9716&mlon=77.5946#map=12/12.9716/77.5946" target="_blank">📍 View Bangalore on Map</a></p>
+    </div>
+
+    <div id="badrachalam" class="mode">
+      <h2>Hyderabad → Badrachalam</h2>
+      <ul>
+        <li>🚌 Bus: ₹400–₹800 (6 hrs)</li>
+        <li>🚆 Train: ₹300–₹600 (5 hrs)</li>
+        <li>🚗 Car: ₹1,200–₹1,800 (6 hrs)</li>
+      </ul>
+      <p>🏨 Accommodation: ₹1,000–₹2,500/night</p>
+      <p>🍽 Food: ₹200–₹500/day</p>
+      <p class="total-budget">💰 Estimated Total Budget: ₹1,500–₹4,000</p>
+      <p><a href="https://www.openstreetmap.org/?mlat=17.5941&mlon=80.2392#map=12/17.5941/80.2392" target="_blank">📍 View Badrachalam on Map</a></p>
+    </div>
+
+    <div id="kurnool" class="mode">
+      <h2>Hyderabad → Kurnool</h2>
+      <ul>
+        <li>🚌 Bus: ₹300–₹600 (4 hrs)</li>
+        <li>🚆 Train: ₹150–₹500 (3.5 hrs)</li>
+        <li>🚗 Car: ₹800–₹1,500 (4 hrs)</li>
+      </ul>
+      <p>🏨 Accommodation: ₹1,000–₹2,500/night</p>
+      <p>🍽 Food: ₹200–₹500/day</p>
+      <p class="total-budget">💰 Estimated Total Budget: ₹1,500–₹4,500</p>
+      <p><a href="https://www.openstreetmap.org/?mlat=15.8281&mlon=78.0469#map=12/15.8281/78.0469" target="_blank">📍 View Kurnool on Map</a></p>
+    </div>
+
+    <div id="ulchala" class="mode">
+      <h2>Hyderabad → Ulchala Village</h2>
+      <ul>
+        <li>🚌 Bus: ₹300–₹600 (6 hrs)</li>
+        <li>🚆 Train: ₹200–₹500 (5 hrs)</li>
+        <li>🚗 Car: ₹1,000–₹1,500 (5 hrs)</li>
+      </ul>
+      <p>🏨 Accommodation: ₹800–₹2,000/night</p>
+      <p>🍽 Food: ₹200–₹400/day</p>
+      <p class="total-budget">💰 Estimated Total Budget: ₹1,500–₹4,000</p>
+      <p><a href="https://www.openstreetmap.org/?mlat=17.7550&mlon=79.4550#map=12/17.7550/79.4550" target="_blank">📍 View Ulchala Village on Map</a></p>
+    </div>
+
+    <div id="delhi" class="mode">
+      <h2>Hyderabad → Delhi</h2>
+      <ul>
+        <li>🚌 Bus: ₹1,000–₹2,000 (24 hrs)</li>
+        <li>🚆 Train: ₹700–₹1,500 (24 hrs)</li>
+        <li>✈️ Flight: ₹2,500–₹5,000 (2.5 hrs)</li>
+      </ul>
+      <p>🏨 Accommodation: ₹2,000–₹5,000/night</p>
+      <p>🍽 Food: ₹400–₹800/day</p>
+      <p class="total-budget">💰 Estimated Total Budget: ₹3,500–₹8,500</p>
+      <p><a href="https://www.openstreetmap.org/?mlat=28.6139&mlon=77.2090#map=12/28.6139/77.2090" target="_blank">📍 View Delhi on Map</a></p>
+    </div>
+
+    <div id="mumbai" class="mode">
+      <h2>Hyderabad → Mumbai</h2>
+      <ul>
+        <li>🚌 Bus: ₹800–₹1,800 (18 hrs)</li>
+        <li>🚆 Train: ₹500–₹1,200 (16 hrs)</li>
+        <li>✈️ Flight: ₹2,000–₹4,500 (1.5 hrs)</li>
+      </ul>
+      <p>🏨 Accommodation: ₹2,000–₹6,000/night</p>
+      <p>🍽 Food: ₹500–₹1,000/day</p>
+      <p class="total-budget">💰 Estimated Total Budget: ₹3,500–₹10,000</p>
+      <p><a href="https://www.openstreetmap.org/?mlat=19.0760&mlon=72.8777#map=12/19.0760/72.8777" target="_blank">📍 View Mumbai on Map</a></p>
+    </div>
+
+    <div id="kolkata" class="mode">
+      <h2>Hyderabad → Kolkata</h2>
+      <ul>
+        <li>🚌 Bus: ₹900–₹2,000 (24 hrs)</li>
+        <li>🚆 Train: ₹600–₹1,500 (26 hrs)</li>
+        <li>✈️ Flight: ₹2,500–₹6,000 (2.5 hrs)</li>
+      </ul>
+      <p>🏨 Accommodation: ₹1,500–₹4,000/night</p>
+      <p>🍽 Food: ₹300–₹800/day</p>
+      <p class="total-budget">💰 Estimated Total Budget: ₹3,000–₹8,500</p>
+      <p><a href="https://www.openstreetmap.org/?mlat=22.5726&mlon=88.3639#map=12/22.5726/88.3639" target="_blank">📍 View Kolkata on Map</a></p>
+    </div>
+
+    <div id="pune" class="mode">
+      <h2>Hyderabad → Pune</h2>
+      <ul>
+        <li>🚌 Bus: ₹700–₹1,500 (13 hrs)</li>
+        <li>🚆 Train: ₹400–₹1,000 (14 hrs)</li>
+        <li>✈️ Flight: ₹2,000–₹4,500 (1 hr)</li>
+      </ul>
+      <p>🏨 Accommodation: ₹1,500–₹4,000/night</p>
+      <p>🍽 Food: ₹300–₹700/day</p>
+      <p class="total-budget">💰 Estimated Total Budget: ₹2,500–₹6,500</p>
+      <p><a href="https://www.openstreetmap.org/?mlat=18.5204&mlon=73.8567#map=12/18.5204/73.8567" target="_blank">📍 View Pune on Map</a></p>
+    </div>
+
+    <div id="ahmedabad" class="mode">
+      <h2>Hyderabad → Ahmedabad</h2>
+      <ul>
+        <li>🚌 Bus: ₹1,000–₹2,200 (21 hrs)</li>
+        <li>🚆 Train: ₹700–₹1,500 (22 hrs)</li>
+        <li>✈️ Flight: ₹2,500–₹5,000 (2 hrs)</li>
+      </ul>
+      <p>🏨 Accommodation: ₹1,500–₹4,000/night</p>
+      <p>🍽 Food: ₹300–₹700/day</p>
+      <p class="total-budget">💰 Estimated Total Budget: ₹3,000–₹8,500</p>
+      <p><a href="https://www.openstreetmap.org/?mlat=23.0225&mlon=72.5714#map=12/23.0225/72.5714" target="_blank">📍 View Ahmedabad on Map</a></p>
+    </div>
+
+    <div id="jaipur" class="mode">
+      <h2>Hyderabad → Jaipur</h2>
+      <ul>
+        <li>🚌 Bus: ₹1,000–₹2,500 (23 hrs)</li>
+        <li>🚆 Train: ₹800–₹1,800 (22 hrs)</li>
+        <li>✈️ Flight: ₹2,500–₹5,500 (2 hrs)</li>
+      </ul>
+      <p>🏨 Accommodation: ₹1,500–₹4,000/night</p>
+      <p>🍽 Food: ₹300–₹700/day</p>
+      <p class="total-budget">💰 Estimated Total Budget: ₹3,000–₹8,500</p>
+      <p><a href="https://www.openstreetmap.org/?mlat=26.9124&mlon=75.7873#map=12/26.9124/75.7873" target="_blank">📍 View Jaipur on Map</a></p>
+    </div>
+
+  </div>
+
+  <script>
+    function showCityInfo() {
+      const selectedCity = document.getElementById("citySelect").value;
+      const allCities = document.querySelectorAll(".mode");
+      allCities.forEach(div => div.style.display = "none");
+      if (selectedCity) {
+        document.getElementById(selectedCity).style.display = "block";
+      }
+    }
+  </script>
+</body>
+</html>

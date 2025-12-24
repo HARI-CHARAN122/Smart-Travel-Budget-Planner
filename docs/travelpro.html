@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Smart Travel Planner — v2.0</title>
+  <meta name="description" content="Smart Travel & Budget Planner — upgraded UI, live calculator, maps, compare & search."/>
+  <style>
+    :root{
+      --bg:#f3f6f8; --card:#ffffff; --accent:#00796B; --muted:#6b6f76;
+      --glass: rgba(255,255,255,0.6);
+    }
+    [data-theme="dark"]{
+      --bg:#0f1720; --card:#0b1220; --accent:#39d1a6; --muted:#9aa4b2; --glass: rgba(255,255,255,0.02);
+      color: #e6eef6;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,var(--bg), #e9eef2 60%);
+      min-height:100vh; padding:28px; color: #0b2430;
+    }
+    header{display:flex;gap:12px;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto 18px;}
+    header h1{font-size:20px;margin:0;color:var(--accent)}
+    .controls{display:flex;gap:10px;align-items:center}
+    .search{padding:10px 12px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);min-width:260px;background:var(--card);box-shadow:0 6px 18px rgba(2,6,23,0.04)}
+    .search input{border:0;outline:0;background:transparent;width:100%;font-size:14px}
+    .btn{background:var(--accent);color:#fff;padding:8px 12px;border-radius:10px;border:0;cursor:pointer}
+    .toggle{display:flex;gap:8px;align-items:center}
+    .container{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 420px;gap:18px;align-items:start}
+    .left{display:grid;gap:12px}
+    .city-card{
+      display:flex;flex-direction:column;background:var(--card);border-radius:12px;overflow:hidden;box-shadow:0 8px 22px rgba(2,6,23,0.07);
+      transition:transform .18s ease, box-shadow .18s ease;
+    }
+    .city-card:hover{transform:translateY(-6px)}
+    .banner{height:180px;background-size:cover;background-position:center}
+    .card-body{padding:14px}
+    .card-body h2{margin:0 0 8px;font-size:18px}
+    .meta{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:13px}
+    .meta span{background:var(--glass);padding:6px 8px;border-radius:8px}
+    .budget{margin-top:10px;font-weight:600;color:var(--accent)}
+    .map{height:180px;border:0;width:100%}
+    .right{position:sticky;top:28px;align-self:start}
+    .panel{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 8px 22px rgba(2,6,23,0.06)}
+    .field{display:flex;flex-direction:column;margin-bottom:10px}
+    label{font-size:13px;color:var(--muted);margin-bottom:6px}
+    input[type="number"], select{padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);background:transparent}
+    .row{display:flex;gap:8px}
+    .compare-box{display:flex;gap:8px;margin-top:8px}
+    .small{font-size:13px;color:var(--muted)}
+    .attractions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .chip{background:var(--glass);padding:8px 10px;border-radius:999px;font-size:13px;color:var(--muted)}
+    footer{max-width:1200px;margin:18px auto 0;text-align:center;color:var(--muted);font-size:13px}
+    @media (max-width:1000px){
+      .container{grid-template-columns:1fr}
+      header{padding-bottom:8px}
+      .right{position:static}
+    }
+    /* tiny animations */
+    .fade-in{animation:fadeIn .28s ease}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Smart Travel Planner — v2.0</h1>
+  <div class="controls">
+    <div class="search">
+      <input id="searchInput" placeholder="Search or type a city (e.g., Warangal)" oninput="onSearch()" />
+    </div>
+    <div class="toggle">
+      <label style="font-size:13px" for="themeToggle">Dark</label>
+      <input id="themeToggle" type="checkbox" aria-label="toggle theme" />
+    </div>
+    <button class="btn" onclick="resetView()">Reset</button>
+  </div>
+</header>
+
+<div class="container">
+  <div class="left">
+    <!-- Main City Card (single / selected) -->
+    <div id="mainCard" class="city-card fade-in">
+      <div id="banner" class="banner" style="background-image: url('https://images.unsplash.com/photo-1526772662000-3f88f10405ff?auto=format&fit=crop&w=1400&q=60')"></div>
+      <div class="card-body">
+        <h2 id="cityTitle">Select a city to view details</h2>
+        <div class="meta" id="metaRow">
+          <span id="travelHints">From Hyderabad • choose transport</span>
+          <span id="timeHint"></span>
+          <span id="priceHint"></span>
+        </div>
+
+        <div style="margin-top:12px" id="descArea">
+          <p class="small">Pick a city from the right panel or search above. Budget calculator on the right updates with travel choices.</p>
+        </div>
+
+        <div class="attractions" id="attractions"></div>
+
+        <div style="margin-top:12px">
+          <iframe id="mapFrame" class="map" src="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compare result (appears when comparing) -->
+    <div id="compareResult" class="city-card" style="display:none">
+      <div class="card-body">
+        <h2>Comparison</h2>
+        <div id="compareContent" class="small"></div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="right">
+    <div class="panel">
+      <h3 style="margin-top:0">Budget Calculator</h3>
+
+      <div class="field">
+        <label>Selected City</label>
+        <select id="citySelect" onchange="onCityChange()" size="6" style="height:240px;">
+          <!-- options populated by JS -->
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Transport</label>
+        <select id="transportSelect" onchange="recalculate()">
+          <option value="bus">Bus</option>
+          <option value="train">Train</option>
+          <option value="car">Car</option>
+          <option value="flight">Flight</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <div style="flex:1" class="field">
+          <label>Days</label>
+          <input id="days" type="number" min="1" value="1" onchange="recalculate()">
+        </div>
+        <div style="flex:1" class="field">
+          <label>People</label>
+          <input id="people" type="number" min="1" value="1" onchange="recalculate()">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Accommodation type</label>
+        <select id="stayType" onchange="recalculate()">
+          <option value="budget">Budget</option>
+          <option value="standard">Standard</option>
+          <option value="premium">Premium</option>
+        </select>
+      </div>
+
+      <div style="margin-top:8px">
+        <div class="small">Estimated total:</div>
+        <div id="totalBudget" class="budget">—</div>
+        <div id="breakdown" class="small" style="margin-top:8px"></div>
+      </div>
+
+      <hr style="margin:12px 0;border:none;height:1px;background:linear-gradient(90deg,transparent,var(--glass),transparent)">
+
+      <h4 style="margin:6px 0">Quick Compare</h4>
+      <div class="compare-box">
+        <select id="compareA" onchange="onCompareChange()"></select>
+        <select id="compareB" onchange="onCompareChange()"></select>
+      </div>
+      <div style="margin-top:8px">
+        <button class="btn" onclick="doCompare()">Compare</button>
+      </div>
+    </div>
+
+    <div style="height:12px"></div>
+
+    <div class="panel" style="text-align:center">
+      <div style="font-size:13px;color:var(--muted)">Pro tip</div>
+      <div style="margin-top:8px;font-weight:600">Click a city to load details → change transport & days → watch budget update</div>
+    </div>
+  </aside>
+</div>
+
+<footer>
+  Built with ❤️ — drop this file in your web root. Data and city list originate from your previous planner. :contentReference[oaicite:1]{index=1}
+</footer>
+
+<script>
+/* ---------- Backend API Configuration ---------- */
+const BACKEND_URL = 'http://localhost:8000';
+
+/* ---------- Basic city dataset (taken from your original file + enhancements) ---------- */
+const cities = {
+  warangal:{
+    title:'Warangal',
+    banner:'https://images.unsplash.com/photo-1549887534-6c4b1c6b6fcb?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[300,600,3],train:[150,400,2.5],car:[1000,1500,3]},
+    stay:{budget:1000,standard:1800,premium:2500},
+    food:[200,500],
+    lat:17.9784,lng:79.5941,
+    top:['Warangal Fort','Thousand Pillar Temple','Bhadrakali Temple'],
+    tip:'Best for short weekend trips from Hyderabad.'
+  },
+  karimnagar:{
+    title:'Karimnagar',
+    banner:'https://images.unsplash.com/photo-1601238322209-2e7d7e9d6b10?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[400,800,4],train:[200,500,3],car:[1000,1500,4]},
+    stay:{budget:1000,standard:1800,premium:2500},
+    food:[200,500],
+    lat:17.3167,lng:79.1289,
+    top:['Elgandal Fort','Lower Manair Dam','Kaleshwaram'],
+    tip:'Carry water if visiting dams in summer.'
+  },
+  araku:{
+    title:'Araku Valley',
+    banner:'https://images.unsplash.com/photo-1502920917128-1aa500764b6f?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[500,1000,7],train:[300,700,8],car:[2000,3000,6]},
+    stay:{budget:1500,standard:2200,premium:3000},
+    food:[300,600],
+    lat:18.1984,lng:82.7753,
+    top:['Tribal Museum','Borra Caves','Coffee Plantations'],
+    tip:'Cool climate — bring a light jacket.'
+  },
+  chennai:{
+    title:'Chennai',
+    banner:'https://images.unsplash.com/photo-1526481280698-8c381f2e8f3b?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[1000,1800,12],train:[500,1200,12],flight:[2000,5000,1]},
+    stay:{budget:2000,standard:3200,premium:5000},
+    food:[400,800],
+    lat:13.0827,lng:80.2707,
+    top:['Marina Beach','Fort St. George','Kapaleeshwarar Temple'],
+    tip:'Coastal city — peak crowd on public beaches on weekends.'
+  },
+  bangalore:{
+    title:'Bangalore',
+    banner:'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[800,1500,10],train:[400,1000,9],flight:[2000,4500,1]},
+    stay:{budget:2000,standard:3500,premium:6000},
+    food:[400,800],
+    lat:12.9716,lng:77.5946,
+    top:['Lalbagh','Bangalore Palace','Cubbon Park'],
+    tip:'Weekdays have heavy traffic — plan extra travel time.'
+  },
+  delhi:{
+    title:'Delhi',
+    banner:'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[1000,2000,24],train:[700,1500,24],flight:[2500,5000,2.5]},
+    stay:{budget:2000,standard:3500,premium:5000},
+    food:[400,800],
+    lat:28.6139,lng:77.2090,
+    top:['Red Fort','Qutub Minar','India Gate'],
+    tip:'Peak tourist season is Oct–Mar.'
+  },
+  mumbai:{
+    title:'Mumbai',
+    banner:'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=1400&q=60',
+    travel:{bus:[800,1800,18],train:[500,1200,16],flight:[2000,4500,1.5]},
+    stay:{budget:2000,standard:4000,premium:6000},
+    food:[500,1000],
+    lat:19.0760,lng:72.8777,
+    top:['Gateway of India','Marine Drive','Colaba Causeway'],
+    tip:'Local trains are fast but very crowded in peak hours.'
+  }
+};
+
+/* Populate selects and UI */
+const citySelect = document.getElementById('citySelect');
+const compareA = document.getElementById('compareA');
+const compareB = document.getElementById('compareB');
+const searchInput = document.getElementById('searchInput');
+
+function populateLists(){
+  citySelect.innerHTML = '';
+  compareA.innerHTML = '';
+  compareB.innerHTML = '';
+  Object.keys(cities).forEach(key=>{
+    const c = cities[key];
+    const opt = document.createElement('option');
+    opt.value = key; opt.textContent = c.title;
+    citySelect.appendChild(opt);
+
+    const o1 = opt.cloneNode(true);
+    compareA.appendChild(o1);
+    const o2 = opt.cloneNode(true);
+    compareB.appendChild(o2);
+  });
+  compareA.selectedIndex = 0;
+  compareB.selectedIndex = 1;
+}
+populateLists();
+
+/* Theme toggle */
+const themeToggle = document.getElementById('themeToggle');
+themeToggle.addEventListener('change', e=>{
+  if(e.target.checked) document.documentElement.setAttribute('data-theme','dark');
+  else document.documentElement.removeAttribute('data-theme');
+});
+
+/* Fetch travel info from backend API */
+async function fetchTravelInfo(city) {
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/query`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({query: `Travel guide for ${city}`})
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      return data.answer; // Returns similar documents from vectorstore
+    }
+  } catch (error) {
+    console.log('Backend not available:', error);
+  }
+  return null;
+}
+
+/* City change handler */
+function onCityChange(){
+  const key = citySelect.value;
+  if(!key) return;
+  loadCity(key);
+  recalculate();
+}
+
+async function loadCity(key){
+  const c = cities[key];
+  document.getElementById('banner').style.backgroundImage = `url(${c.banner})`;
+  document.getElementById('cityTitle').textContent = `Hyderabad → ${c.title}`;
+  document.getElementById('travelHints').textContent = `From Hyderabad`;
+  document.getElementById('timeHint').textContent = `Typical travel time varies`;
+  document.getElementById('priceHint').textContent = `Estimated range shown below`;
+  
+  // Fetch additional info from backend
+  const backendInfo = await fetchTravelInfo(c.title);
+  let descHTML = `<p class="small">${c.tip}</p>`;
+  
+  if (backendInfo) {
+    descHTML += `<div style="margin-top:10px; padding:10px; background:var(--glass); border-radius:8px; font-size:13px">
+      <strong>📚 Travel Guide Info:</strong><br>${backendInfo.substring(0, 300)}...
+    </div>`;
+  }
+  
+  document.getElementById('descArea').innerHTML = descHTML;
+  
+  const atts = document.getElementById('attractions');
+  atts.innerHTML = '';
+  c.top.forEach(t=>{
+    const d = document.createElement('div'); d.className='chip'; d.textContent = t;
+    atts.appendChild(d);
+  });
+  // set map to OpenStreetMap embed with marker
+  const lat = c.lat, lon = c.lng;
+  const zoom = 11;
+  const osm = `https://www.openstreetmap.org/export/embed.html?bbox=${lon-0.5}%2C${lat-0.5}%2C${lon+0.5}%2C${lat+0.5}&layer=mapnik&marker=${lat}%2C${lon}`;
+  document.getElementById('mapFrame').src = osm;
+}
+
+/* search box filter */
+async function onSearch(){
+  const q = searchInput.value.trim().toLowerCase();
+  if(!q) return;
+  // find nearest match
+  const keys = Object.keys(cities);
+  const found = keys.find(k=>{
+    return cities[k].title.toLowerCase().includes(q);
+  });
+  if(found){
+    // select it in the list and load
+    citySelect.value = found;
+    await loadCity(found);
+    recalculate();
+  }
+}
+
+/* Budget calculator logic */
+function recalculate(){
+  const key = citySelect.value;
+  if(!key) { document.getElementById('totalBudget').textContent='—'; return; }
+  const c = cities[key];
+  const transportType = document.getElementById('transportSelect').value;
+  const days = Math.max(1, Number(document.getElementById('days').value || 1));
+  const people = Math.max(1, Number(document.getElementById('people').value || 1));
+  const stayType = document.getElementById('stayType').value;
+
+  // determine transport cost: use midpoint of range
+  const tRange = c.travel[transportType] || c.travel['train'];
+  const tCost = Math.round((tRange[0] + tRange[1])/2);
+
+  const stayPerNight = c.stay[stayType] || c.stay['standard'];
+  const foodPerDayPerPerson = Math.round((c.food[0] + c.food[1])/2);
+
+  // calculation: transport per person (assume tCost is per person for bus/train/flight, for car assume cost is split)
+  let transportTotal = tCost * people;
+  if(transportType === 'car') transportTotal = Math.round(tCost); // car cost assumed for vehicle (user may share)
+
+  const stayTotal = stayPerNight * days * Math.ceil(people/2); // assume 2 per room
+  const foodTotal = foodPerDayPerPerson * days * people;
+
+  const grand = transportTotal + stayTotal + foodTotal;
+  document.getElementById('totalBudget').textContent = `₹ ${grand.toLocaleString()} (approx)`;
+  document.getElementById('breakdown').innerHTML =
+    `Transport: ₹${transportTotal.toLocaleString()} • Stay: ₹${stayTotal.toLocaleString()} • Food: ₹${foodTotal.toLocaleString()} (for ${people} pax / ${days} days)`;
+}
+
+/* Compare feature */
+function onCompareChange(){ /* noop for now */ }
+function doCompare(){
+  const a = compareA.value, b = compareB.value;
+  if(!a || !b || a===b){ alert('Pick two different cities to compare'); return; }
+  const A = cities[a], B = cities[b];
+  const tA = Math.round((A.travel.train[0]+A.travel.train[1])/2), tB = Math.round((B.travel.train[0]+B.travel.train[1])/2);
+  const stayA = A.stay.standard, stayB = B.stay.standard;
+  const foodA = Math.round((A.food[0]+A.food[1])/2), foodB = Math.round((B.food[0]+B.food[1])/2);
+
+  const sampleDays = 2, samplePeople = 1;
+  const totalA = tA*samplePeople + stayA*sampleDays + foodA*sampleDays*samplePeople;
+  const totalB = tB*samplePeople + stayB*sampleDays + foodB*sampleDays*samplePeople;
+
+  const content = `
+    <div style="display:flex;gap:12px;align-items:center">
+      <div style="flex:1">
+        <strong>${A.title}</strong><br><span class="small">Train≈₹${tA}, Stay(standard)≈₹${stayA}/night, Food≈₹${foodA}/day</span>
+      </div>
+      <div style="flex:1">
+        <strong>${B.title}</strong><br><span class="small">Train≈₹${tB}, Stay(standard)≈₹${stayB}/night, Food≈₹${foodB}/day</span>
+      </div>
+    </div>
+    <div style="margin-top:10px">Estimated total for 1 person, ${sampleDays} days: <strong>₹${totalA}</strong> vs <strong>₹${totalB}</strong></div>
+  `;
+  document.getElementById('compareContent').innerHTML = content;
+  document.getElementById('compareResult').style.display = 'block';
+  document.getElementById('compareResult').scrollIntoView({behavior:'smooth'});
+}
+
+/* reset view */
+function resetView(){
+  document.getElementById('mainCard').scrollIntoView({behavior:'smooth'});
+  document.getElementById('cityTitle').textContent = 'Select a city to view details';
+  document.getElementById('banner').style.backgroundImage = "url('https://images.unsplash.com/photo-1526772662000-3f88f10405ff?auto=format&fit=crop&w=1400&q=60')";
+  document.getElementById('descArea').innerHTML = `<p class="small">Pick a city from the right panel or search above. Budget calculator on the right updates with travel choices.</p>`;
+  document.getElementById('attractions').innerHTML = '';
+  document.getElementById('mapFrame').src = '';
+  document.getElementById('totalBudget').textContent = '—';
+  document.getElementById('breakdown').textContent = '';
+}
+
+/* initialize */
+(async function init(){
+  populateLists();
+  // set initial selection
+  const firstKey = Object.keys(cities)[0];
+  citySelect.value = firstKey;
+  compareA.selectedIndex = 0;
+  compareB.selectedIndex = 1;
+  await loadCity(firstKey);
+  recalculate();
+})();
+
+</script>
+</body>
+</html>
