@@ -136,8 +136,10 @@ GET /
 - 🎨 Responsive, clean UI
 
 ### Vector Database
-
 **ChromaDB** - Persistent vector storage
+>> Note: The `chromadb/` folder is auto-generated on first backend run and is intentionally excluded from GitHub using `.gitignore`.
+
+
 
 ```
 chromadb/
@@ -162,7 +164,7 @@ Stores:
 | **RAG Framework** | LangChain |
 | **Frontend (Web)** | Vanilla HTML/CSS/JS |
 | **Frontend (App)** | Streamlit |
-| **Python Version** | 3.13.4 |
+| **Python Version** | 3.11 (recommended) |
 | **Dependencies** | See requirements.txt |
 
 ---
@@ -309,7 +311,7 @@ Stores:
 ## 🚀 Installation & Setup
 
 ### Prerequisites
-- Python 3.13.4+
+- Python 3.11 (recommended)
 - Git
 - pip or conda
 
@@ -323,8 +325,8 @@ cd travel_streamlit
 ### Step 2: Create Virtual Environment
 
 ```bash
-python -m venv .venv
-.venv\Scripts\activate  # Windows
+py -3.11 -m venv venv
+venv\Scripts\activate # Windows
 source .venv/bin/activate  # Linux/Mac
 ```
 
